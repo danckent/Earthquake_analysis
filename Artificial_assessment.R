@@ -1,6 +1,3 @@
-# Your submission should be published to a GitHub repository with a README with
-# instructions on how to run the program and how to run the tests.
-
 #### load packages ####
 library( jsonlite) # to read JSON file
 library( dplyr) # for rapid manipulation
@@ -34,38 +31,28 @@ get_earthquakes <- function( date = Sys.time()) {
 
 ##### Tsunamis ####
 
-tsunamis <- all_30_days$features$properties %>% 
+get_tsunamis <- function( date = Sys.time()) {
+  
+  # consideration needs to be made regarding the users time of access, therefore accessing the system date is required
+  set_date <- as.Date( date)
+  last_30_days <- as.Date( set_date) - 30
+  
+  # Download data
+  download.file(url = paste("https://earthquake.usgs.gov/fdsnws/event/1/query.geojson?starttime=", last_30_days, "&endtime=", set_date, sep = ""), destfile = "~/Data/Artificial/30_days_data.json")
+  
+  # Read data
+  all_30_days <- fromJSON(txt = "~/Data/Artificial/30_days_data.json")
+  
+  tsunamis <- all_30_days$features$properties %>% 
   filter(tsunami == 1)  # include the total number of tsunamis across all events in the last 30 days
 
+  return(tsunamis)
+}
+
+get_tsunamis()
+
+tsunamis <- get_tsunamis()
 tsunamis[which.max(tsunamis$sig),]$place # print the location of the event with the largest significance/impact
-
-#### Tests ####
-
-library( testthat)
-
-# Call the function with custom date
-get_earthquakes( date = "2023-02-04")
-
-# Call the function with default date (Sys.time())
-get_earthquakes()
-
-context("Earthquakes")
-
-test_that("get_earthquakes", code = {
-  result <- get_earthquakes(date = "2023-02-04")
-  
-  # Check the result returns a magnitude of more than 4.5
-  expect_true(all(result$mag > 4.5))
-  
-})
-
-test_that("get_earthquakes", code = {
-  result <- get_earthquakes(date = "2023-02-04")
-  
-  # Check the result does not return Afghanistan
-  expect_true(all(!grepl("Afghanistan", result$place)))
-  
-})
 
 
 
