@@ -29,6 +29,8 @@ get_earthquakes <- function( date = Sys.time()) {
   return(recent_earthquakes)
 }
 
+get_earthquakes()
+
 ##### Tsunamis ####
 
 get_tsunamis <- function( date = Sys.time()) {
